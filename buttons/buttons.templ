@@ -1,0 +1,101 @@
+package buttons
+
+import "fmt"
+
+const (
+	VariantDefault     = "default"
+	VariantDestructive = "destructive"
+	VariantOutline     = "outline"
+	VariantSecondary   = "secondary"
+	VariantGhost       = "ghost"
+	VariantLink        = "link"
+	VariantTab         = "tab"
+
+	SizeDefault = "default"
+	SizeSm      = "sm"
+	SizeLg      = "lg"
+	SizeIcon    = "icon"
+)
+
+var buttonStyle = map[string]map[string]string{
+	"variant": {
+		VariantDefault:     "bg-primary text-primary-foreground hover:bg-primary/90",
+		VariantDestructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+		VariantOutline:     "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+		VariantSecondary:   "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+		VariantGhost:       "hover:bg-accent hover:text-accent-foreground",
+		VariantLink:        "text-primary underline-offset-4 hover:underline",
+		VariantTab:         "border border-green-600 rounded-b-none bg-green-300 h-6 px-4 font-medium",
+	},
+	"size": {
+		SizeDefault: "h-10 px-4 py-2",
+		SizeSm:      "h-9 rounded-md px-3",
+		SizeLg:      "h-11 rounded-md px-8",
+		SizeIcon:    "h-10 w-10",
+	},
+}
+
+type ButtonProps struct {
+	href    string
+	variant string
+	size    string
+	attrs   templ.Attributes
+	_type   string
+}
+
+func AsLink(href string) func(*ButtonProps) {
+	return func(bp *ButtonProps) { bp.href = href }
+}
+
+func Variant(variant string) func(*ButtonProps) {
+	return func(bp *ButtonProps) { bp.variant = variant }
+}
+
+func Size(size string) func(*ButtonProps) {
+	return func(bp *ButtonProps) { bp.size = size }
+}
+
+func Attrs(attrs templ.Attributes) func(*ButtonProps) {
+	return func(bp *ButtonProps) { bp.attrs = attrs }
+}
+
+func Submit() func(*ButtonProps) {
+	return func(bp *ButtonProps) { bp._type = "submit" }
+}
+
+func Button(options ...func(*ButtonProps)) templ.Component {
+	props := &ButtonProps{_type: "button"}
+	for _, o := range options {
+		o(props)
+	}
+	if props.variant == "" {
+		props.variant = VariantDefault
+	}
+	if props.size == "" {
+		props.size = SizeDefault
+	}
+	props.attrs["class"] = fmt.Sprintf("%s %s %s",
+		"inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shadow",
+		buttonStyle["variant"][props.variant],
+		buttonStyle["size"][props.size],
+	)
+	asLink := props.href != ""
+	if asLink {
+		props.attrs["href"] = props.href
+	} else {
+		props.attrs["type"] = props._type
+	}
+	return button(asLink, props.attrs)
+}
+
+templ button(asLink bool, attrs templ.Attributes) {
+	if asLink {
+		<a { attrs... }>
+			{ children... }
+		</a>
+	} else {
+		<button { attrs... }>
+			{ children... }
+		</button>
+	}
+}
