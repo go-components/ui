@@ -74,6 +74,13 @@ func Hx(opts ...func(hx.HX)) func(*ButtonProps) {
 	return func(bp *ButtonProps) { bp.hx = hx.New(opts...) }
 }
 
+var buttonClasses = `
+inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm
+font-medium ring-offset-background transition-colors focus-visible:outline-none
+focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+disabled:pointer-events-none disabled:opacity-50 shadow
+`
+
 func Button(options ...func(*ButtonProps)) templ.Component {
 	props := &ButtonProps{_type: "button"}
 	for _, o := range options {
@@ -87,7 +94,7 @@ func Button(options ...func(*ButtonProps)) templ.Component {
 	}
 	attrs := templ.Attributes{}
 	attrs["class"] = fmt.Sprintf("%s %s %s",
-		"inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shadow",
+		buttonClasses,
 		buttonStyle["variant"][props.variant],
 		buttonStyle["size"][props.size],
 	)

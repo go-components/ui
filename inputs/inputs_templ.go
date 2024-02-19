@@ -58,6 +58,14 @@ func Value(value string) func(*InputProps) {
 	return func(ip *InputProps) { ip.value = value }
 }
 
+var inputClasses = `
+flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm
+ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium
+placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2
+focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed
+disabled:opacity-50 data-[invalid=true]:ring-destructive
+`
+
 func Input(id, name string, options ...func(*InputProps)) templ.Component {
 	props := &InputProps{id: id, name: name}
 	for _, o := range options {
@@ -66,18 +74,20 @@ func Input(id, name string, options ...func(*InputProps)) templ.Component {
 	if props._type == "" {
 		props._type = "text"
 	}
+	valid := props.errorMessage == ""
 	attrs := templ.Attributes{
 		"name":         name,
 		"id":           id,
-		"class":        "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[invalid=true]:ring-destructive",
+		"class":        inputClasses,
 		"autofocus":    props.autofocus,
 		"autocomplete": props.autocomplete,
 		"tabindex":     props.tabindex,
 		"type":         props._type,
 		"placeholder":  props.placeholder,
 		"value":        props.value,
+		"data-invalid": strconv.FormatBool(!valid),
 	}
-	if props.errorMessage != "" {
+	if !valid {
 		attrs["autofocus"] = "on"
 	}
 	return input(props.errorMessage, attrs)
@@ -104,15 +114,7 @@ func input(err string, attrs templ.Attributes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" data-invalid=\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(strconv.FormatBool(err != "")))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"> ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -124,7 +126,7 @@ func input(err string, attrs templ.Attributes) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(err)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `inputs/inputs.templ`, Line: 78, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `inputs/inputs.templ`, Line: 88, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
