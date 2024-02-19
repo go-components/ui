@@ -64,6 +64,7 @@ func Input(id, name string, options ...func(*InputProps)) templ.Component {
 	if props._type == "" {
 		props._type = "text"
 	}
+	valid := props.errorMessage == ""
 	attrs := templ.Attributes{
 		"name":         name,
 		"id":           id,
@@ -74,15 +75,16 @@ func Input(id, name string, options ...func(*InputProps)) templ.Component {
 		"type":         props._type,
 		"placeholder":  props.placeholder,
 		"value":        props.value,
+		"data-invalid": strconv.FormatBool(!valid),
 	}
-	if props.errorMessage != "" {
+	if !valid {
 		attrs["autofocus"] = "on"
 	}
 	return input(props.errorMessage, attrs)
 }
 
 templ input(err string, attrs templ.Attributes) {
-	<input { attrs... } data-invalid={ strconv.FormatBool(err != "") }/>
+	<input { attrs... }/>
 	if err != "" {
 		<span class="text-sm text-destructive">{ err }</span>
 	}
