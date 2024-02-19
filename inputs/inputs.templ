@@ -1,0 +1,81 @@
+package inputs
+
+import "strconv"
+
+type Errors map[string]string
+
+func (e *Errors) IsNil() bool {
+	return e == nil
+}
+
+type InputProps struct {
+	id           string
+	name         string
+	autofocus    bool
+	autocomplete string
+	tabindex     string
+	_type        string
+	errorMessage string
+	placeholder  string
+	value        string
+}
+
+func Autofocus() func(*InputProps) {
+	return func(ip *InputProps) { ip.autofocus = true }
+}
+
+func Autocomplete(completion string) func(*InputProps) {
+	return func(ip *InputProps) { ip.autocomplete = completion }
+}
+
+func Tabindex(index int) func(*InputProps) {
+	return func(ip *InputProps) { ip.tabindex = strconv.Itoa(index) }
+}
+
+func Type(_type string) func(*InputProps) {
+	return func(ip *InputProps) { ip._type = _type }
+}
+
+func Error(errors Errors) func(*InputProps) {
+	return func(ip *InputProps) { ip.errorMessage = errors[ip.name] }
+}
+
+func Placeholder(placeholder string) func(*InputProps) {
+	return func(ip *InputProps) { ip.placeholder = placeholder }
+}
+
+func Value(value string) func(*InputProps) {
+	return func(ip *InputProps) { ip.value = value }
+}
+
+func Input(id, name string, options ...func(*InputProps)) templ.Component {
+	props := &InputProps{id: id, name: name}
+	for _, o := range options {
+		o(props)
+	}
+	if props._type == "" {
+		props._type = "text"
+	}
+	attrs := templ.Attributes{
+		"name":         name,
+		"id":           id,
+		"class":        "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[invalid=true]:ring-destructive",
+		"autofocus":    props.autofocus,
+		"autocomplete": props.autocomplete,
+		"tabindex":     props.tabindex,
+		"type":         props._type,
+		"placeholder":  props.placeholder,
+		"value":        props.value,
+	}
+	if props.errorMessage != "" {
+		attrs["autofocus"] = "on"
+	}
+	return input(props.errorMessage, attrs)
+}
+
+templ input(err string, attrs templ.Attributes) {
+	<input { attrs... } data-invalid={ strconv.FormatBool(err != "") }/>
+	if err != "" {
+		<span class="text-sm text-destructive">{ err }</span>
+	}
+}
